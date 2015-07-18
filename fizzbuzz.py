@@ -6,7 +6,25 @@ class InvalidParamsException(Exception):
     pass
 
 
-def fizzbuzzer(start, finish):
+def step1_f(num):
+    if not num % 15:
+        return 'fizzbuzz'
+    elif not num % 5:
+        return 'buzz'
+    elif not num % 3:
+        return 'fizz'
+    else:
+        return None
+
+
+def step2_f(num):
+    if '3' in str(num):
+        return 'lucky'
+    else:
+        return step1_f(num)
+
+
+def fizzbuzzer(start, finish, comp_fun=step2_f):
     try:
         i_start = int(start)
         i_finish = int(finish)
@@ -18,12 +36,9 @@ def fizzbuzzer(start, finish):
 
     elements = []
     for num in range(i_start, i_finish+1):
-        if not num % 15:
-            elements.append('fizzbuzz')
-        elif not num % 5:
-            elements.append('buzz')
-        elif not num % 3:
-            elements.append('fizz')
+        computed = comp_fun(num)
+        if computed is not None:
+            elements.append(computed)
         else:
             elements.append(str(num))
     return ' '.join(elements)
@@ -38,6 +53,6 @@ if __name__ == '__main__':
         exit_usage()
 
     try:
-        print(fizzbuzzer(sys.argv[1], sys.argv[2]))
+        print(fizzbuzzer(sys.argv[1], sys.argv[2], step2_f))
     except InvalidParamsException:
         exit_usage()
