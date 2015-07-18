@@ -6,25 +6,60 @@ class InvalidParamsException(Exception):
     pass
 
 
-def step1_f(num):
-    if not num % 15:
-        return 'fizzbuzz'
-    elif not num % 5:
-        return 'buzz'
-    elif not num % 3:
-        return 'fizz'
-    else:
-        return None
+class Step1(object):
+    def subst(self, num):
+        if not num % 15:
+            return 'fizzbuzz'
+        elif not num % 5:
+            return 'buzz'
+        elif not num % 3:
+            return 'fizz'
+        else:
+            return None
+
+    def appendix(self):
+        return ''
 
 
-def step2_f(num):
-    if '3' in str(num):
-        return 'lucky'
-    else:
-        return step1_f(num)
+class Step2(Step1):
+    def subst(self, num):
+        if '3' in str(num):
+            return 'lucky'
+        else:
+            return super(Step2, self).subst(num)
 
 
-def fizzbuzzer(start, finish, comp_fun=step2_f):
+class Step3(Step2):
+    def __init__(self):
+        super(Step3, self).__init__()
+        self.integers = 0
+        self.substs = {}
+
+    def subst(self, num):
+        res = super(Step3, self).subst(num)
+        if res is not None:
+            if res in self.substs:
+                self.substs[res] += 1
+            else:
+                self.substs[res] = 1
+        else:
+            self.integers += 1
+        return res
+
+    def appendix(self):
+        apx = ''
+        for term in ['fizz', 'buzz', 'fizzbuzz', 'lucky']:
+            if term in self.substs:
+                num = self.substs[term]
+            else:
+                num = 0
+            apx += '\n{term}: {num}'.format(term=term, num=num)
+        apx += '\ninteger: {num_integers}'.format(num_integers=self.integers)
+        return apx
+
+
+def fizzbuzzer(start, finish, transformer_class=Step1):
+    transformer = transformer_class()
     try:
         i_start = int(start)
         i_finish = int(finish)
@@ -36,12 +71,12 @@ def fizzbuzzer(start, finish, comp_fun=step2_f):
 
     elements = []
     for num in range(i_start, i_finish+1):
-        computed = comp_fun(num)
+        computed = transformer.subst(num)
         if computed is not None:
             elements.append(computed)
         else:
             elements.append(str(num))
-    return ' '.join(elements)
+    return ' '.join(elements) + transformer.appendix()
 
 
 def exit_usage():
@@ -53,6 +88,6 @@ if __name__ == '__main__':
         exit_usage()
 
     try:
-        print(fizzbuzzer(sys.argv[1], sys.argv[2], step2_f))
+        print(fizzbuzzer(sys.argv[1], sys.argv[2], Step3))
     except InvalidParamsException:
         exit_usage()
